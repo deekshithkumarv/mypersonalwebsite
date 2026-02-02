@@ -1,9 +1,9 @@
 import { PassThrough } from "stream";
 
-import type { EntryContext, HandleDataRequestFunction } from "@remix-run/node";
-import { Response } from "@remix-run/node";
+import { createReadableStreamFromReadable, type EntryContext, type HandleDataRequestFunction } from "@remix-run/node";
+
 import { RemixServer } from "@remix-run/react";
-import isbot from "isbot";
+import { isbot } from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 import etag from "etag";
 
@@ -17,17 +17,17 @@ const handleRequest = (
 ) =>
   isbot(request.headers.get("user-agent"))
     ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      )
+      request,
+      responseStatusCode,
+      responseHeaders,
+      remixContext
+    )
     : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      );
+      request,
+      responseStatusCode,
+      responseHeaders,
+      remixContext
+    );
 export default handleRequest;
 
 const handleBotRequest = (
@@ -48,7 +48,7 @@ const handleBotRequest = (
           responseHeaders.set("Content-Type", "text/html");
 
           resolve(
-            new Response(body, {
+            new Response(createReadableStreamFromReadable(body), {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
             })
@@ -88,7 +88,7 @@ const handleBrowserRequest = (
           responseHeaders.set("Content-Type", "text/html");
 
           resolve(
-            new Response(body, {
+            new Response(createReadableStreamFromReadable(body), {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
             })
