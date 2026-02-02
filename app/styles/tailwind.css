@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Modern Clean Light Mode */
+  --background-body: #f8fafc;
+  /* Slate-50 */
+  --text-main: #0f172a;
+  /* Slate-900 */
+  --text-secondary: #475569;
+  /* Slate-600 */
+  --primary-color: #0d9488;
+  /* Teal-600 */
+  --secondary-color: #06b6d4;
+  /* Cyan-500 */
+  --accent-color: #f59e0b;
+  /* Amber-500 */
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+}
+
+.dark {
+  /* Deep Modern Dark Mode */
+  --dark-background-body: #020617;
+  /* Slate-950 */
+  --dark-text-main: #f1f5f9;
+  /* Slate-100 */
+  --dark-text-secondary: #94a3b8;
+  /* Slate-400 */
+  --primary-color: #14b8a6;
+  /* Teal-500 */
+  --secondary-color: #22d3ee;
+  /* Cyan-400 */
+  --accent-color: #fbbf24;
+  /* Amber-400 */
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-bg: rgba(15, 23, 42, 0.6);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-text-primary dark:bg-d-background dark:text-d-text-primary transition-colors duration-300;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-[var(--glass-bg)] shadow-sm;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+  }
+}
