@@ -1,4 +1,5 @@
-import { ActionFunction, json } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import type { ActionArgs } from "@remix-run/node";
 import OpenAI from "openai";
 
 // Configure Edge Runtime for this route
@@ -31,7 +32,7 @@ Guidelines for your responses:
 - Keep responses relatively brief (1-3 small paragraphs max) as this is a small chat widget.
 - Use conversational formatting (bullet points are okay if listing skills, but keep it tight).`;
 
-export async function action({ request }: Parameters<ActionFunction>[0]) {
+export const action = async ({ request }: ActionArgs) => {
     console.log("[Chat API] Action started");
 
     if (request.method !== "POST") {
@@ -95,4 +96,4 @@ export async function action({ request }: Parameters<ActionFunction>[0]) {
             { status: 500 }
         );
     }
-}
+};
