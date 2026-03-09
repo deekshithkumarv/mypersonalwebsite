@@ -1,6 +1,11 @@
 import { ActionFunction, json } from "@remix-run/node";
 import OpenAI from "openai";
 
+// Configure Edge Runtime for this route
+export const config = {
+    runtime: "edge",
+};
+
 // Initialize OpenAI client with Groq's base URL and your GROQ_API_KEY
 // Assuming GROQ_API_KEY is defined in your .env
 const openai = new OpenAI({
@@ -27,8 +32,17 @@ Guidelines for your responses:
 - Use conversational formatting (bullet points are okay if listing skills, but keep it tight).`;
 
 export async function action({ request }: Parameters<ActionFunction>[0]) {
+    console.log("[Chat API] Action started");
+
     if (request.method !== "POST") {
+        console.warn("[Chat API] Method not allowed:", request.method);
         return json({ error: "Method not allowed" }, { status: 405 });
+    }
+
+    // Check for API Key explicitly
+    if (!process.env.GROQ_API_KEY) {
+        console.error("[Chat API] GROQ_API_KEY is missing in environment variables!");
+        return json({ error: "API configuration error. Please check server logs." }, { status: 500 });
     }
 
     try {
@@ -36,8 +50,11 @@ export async function action({ request }: Parameters<ActionFunction>[0]) {
         const { messages } = body;
 
         if (!messages || !Array.isArray(messages)) {
+            console.warn("[Chat API] Invalid messages array received");
             return json({ error: "Invalid messages array" }, { status: 400 });
         }
+
+        console.log(`[Chat API] Processing ${messages.length} messages`);
 
         // Prepend the system prompt to the messages array
         const apiMessages: any[] = [
@@ -48,6 +65,9 @@ export async function action({ request }: Parameters<ActionFunction>[0]) {
             }))
         ];
 
+        console.log("[Chat API] Starting Groq completion call...");
+        const startTime = Date.now();
+
         // Call Groq (via OpenAI SDK)
         const response = await openai.chat.completions.create({
             model: "llama-3.1-8b-instant", // Fast model suitable for chat
@@ -56,12 +76,20 @@ export async function action({ request }: Parameters<ActionFunction>[0]) {
             max_tokens: 500, // Keep responses concise for the widget
         });
 
+        const duration = Date.now() - startTime;
+        console.log(`[Chat API] Groq completion finished in ${duration}ms`);
+
         const reply = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
 
         return json({ reply });
 
     } catch (error: any) {
-        console.error("Chat API Error:", error);
+        console.error("[Chat API] Error:", error);
+        // Log more details if available
+        if (error.response) {
+            console.error("[Chat API] OpenAI/Groq API error response:", error.response.status, error.response.data);
+        }
+
         return json(
             { error: error.message || "An error occurred while communicating with the AI." },
             { status: 500 }
